@@ -1,0 +1,44 @@
+<configuration debug="true">
+    <property name="APP_NAME" value="transaction-service"/>
+    <springProfile name="local|dev">
+        <property name="LOG_DIR" value="/tmp"/>
+    </springProfile>
+    <springProfile name="qa">
+        <property name="LOG_DIR" value="/logs/${APP_NAME}"/>
+    </springProfile>
+    <springProfile name="prod">
+        <property name="LOG_DIR" value="/logs/${APP_NAME}"/>
+    </springProfile>
+    <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}- [%mdc] - %msg%n"/>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR:-/tmp}/app.log</file>
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_NAME}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>10</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="ASYNC-CONSOLE-APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CONSOLE"/>
+    </appender>
+
+    <appender name="ASYNC-FILE-APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="ASYNC-CONSOLE-APPENDER"/>
+        <appender-ref ref="ASYNC-FILE-APPENDER"/>
+    </root>
+</configuration>
